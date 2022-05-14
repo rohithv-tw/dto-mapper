@@ -9,8 +9,9 @@ type Name struct {
 }
 
 type SourceDto struct {
-	Name      Name      `json:"name"`
-	Age       uint32    `json:"age"`
-	Friends   []Name    `json:"friends"`
-	CreatedAt time.Time `json:"created_at"`
+	Name      Name                   `json:"name"`
+	Age       uint32                 `json:"age"`
+	Friends   []Name                 `json:"friends"`
+	CreatedAt time.Time              `json:"created_at"`
+	Data      map[string]interface{} `json:"data"`
 }

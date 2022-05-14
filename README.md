@@ -11,10 +11,6 @@ Example:
 Refer `dto/source_dto.go` and `dto/target_dto.go`
 Refer `main.go` for example.
 
-Not Supported:
-
-Mapping `map[key]value` based fields.
-
 Pending:
 
 Add logger wrapper to wrap zerolog logging.

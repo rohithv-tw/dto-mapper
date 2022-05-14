@@ -7,7 +7,25 @@ import (
 	"reflect"
 )
 
-func IsGivenTypeStruct(ctx context.Context, givenType reflect.Type) error {
+func FindIndirectType(ctx context.Context, value reflect.Value) reflect.Type {
+	logger := log.Ctx(ctx).With().
+		Timestamp().
+		Fields(map[string]interface{}{
+			"Class":  "ReflectionUtil",
+			"Method": "FindIndirectType",
+		}).
+		Logger()
+
+	if value.Kind() == reflect.Ptr {
+		logger.Info().Msgf("Found pointer, finding indirect type")
+		return FindIndirectType(ctx, reflect.Indirect(value))
+	}
+
+	logger.Info().Msgf("Found non pointer type. returning")
+	return value.Type()
+}
+
+func IsGivenTypeStruct(ctx context.Context, givenType reflect.Type) bool {
 	logger := log.Ctx(ctx).With().
 		Timestamp().
 		Fields(map[string]interface{}{
@@ -17,65 +35,8 @@ func IsGivenTypeStruct(ctx context.Context, givenType reflect.Type) error {
 		}).
 		Logger()
 
-	if givenType.Kind() != reflect.Struct {
-		invalidTypeErr := fmt.Errorf("given type is not struct %s", givenType.Name())
-		logger.Error().Msgf("Error while getting type of given struct.Error := %v", invalidTypeErr)
-		return invalidTypeErr
-	}
-
-	logger.Info().Msgf("Given type is struct")
-	return nil
-}
-
-func initializeStruct(ctx context.Context, t reflect.Type, v reflect.Value) {
-	logger := log.Ctx(ctx).With().
-		Timestamp().
-		Fields(map[string]interface{}{
-			"Class":  "ReflectionUtil",
-			"Method": "initializeStruct",
-		}).
-		Logger()
-
-	for i := 0; i < v.NumField(); i++ {
-		fieldValue := v.Field(i)
-		fieldType := t.Field(i)
-		logger.Info().Msgf("Found fieldValue %s with type %s", fieldType.Name, fieldType.Type.String())
-		switch fieldType.Type.Kind() {
-		case reflect.Map:
-			fieldValue.Set(reflect.MakeMapWithSize(fieldType.Type, 0))
-		case reflect.Slice:
-			fieldValue.Set(reflect.MakeSlice(fieldType.Type, 0, 0))
-		case reflect.Chan:
-			fieldValue.Set(reflect.MakeChan(fieldType.Type, 0))
-		case reflect.Struct:
-			initializeStruct(ctx, fieldType.Type, fieldValue)
-		case reflect.Ptr:
-			fieldValue := reflect.New(fieldType.Type.Elem())
-			initializeStruct(ctx, fieldType.Type.Elem(), fieldValue.Elem())
-			fieldValue.Set(fieldValue)
-		default:
-			logger.Warn().Msgf("Set Zero Value for fieldValue %s with type %s", fieldType.Name, fieldType.Type.String())
-			zero := reflect.Zero(fieldType.Type)
-			fieldValue.Set(zero)
-		}
-	}
-}
-
-func InitializeStruct[T any](ctx context.Context, structType reflect.Type) *T {
-	logger := log.Ctx(ctx).With().
-		Timestamp().
-		Fields(map[string]interface{}{
-			"Class":  "ReflectionUtil",
-			"Method": "InitializeStruct",
-		}).
-		Logger()
-
-	targetInstanceValue := reflect.New(structType)
-	initializeStruct(ctx, structType, targetInstanceValue.Elem())
-	targetInstance := targetInstanceValue.Interface().(*T)
-
-	logger.Info().Msgf("Create instance successfully for %s", structType.Name())
-	return targetInstance
+	logger.Error().Msgf("given type is %s", givenType.Name())
+	return givenType.Kind() == reflect.Struct
 }
 
 func GetTagFieldMap(ctx context.Context, structType reflect.Type, tag string) (taggedFields map[string]string) {

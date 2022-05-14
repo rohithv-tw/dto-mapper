@@ -4,6 +4,7 @@ import (
 	"context"
 	"dto-mapper/dto"
 	"dto-mapper/mapper"
+	"fmt"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"os"
@@ -36,26 +37,30 @@ func main() {
 		CreatedAt: time.Now(),
 		Friends: []dto.Name{
 			{
-				First:  "f-f-1",
-				Middle: "f-m-1",
-				Last:   "f-l-1",
+				First:  "first-1",
+				Middle: "middle-1",
+				Last:   "last-1",
 			},
 			{
-				First:  "f-f-2",
-				Middle: "f-m-2",
-				Last:   "f-l-2",
+				First:  "first-2",
+				Middle: "middle-2",
+				Last:   "last-2",
 			},
+		},
+		Data: map[string]interface{}{
+			"key1": 1,
 		},
 	}
 
 	output := dto.TargetDto{}
 
+	fmt.Printf("Input := %v\n", input)
 	log.Info().Msg("map from source to target")
-	output2, err := mapper.MapFrom(ctx, input, output)
+	err := mapper.MapFrom(ctx, input, &output)
 	if err != nil {
 		log.Error().Msgf("Error while mapping.Error := %v", err)
 		return
 	}
 
-	log.Info().Msgf("Mapped response := %v", *output2)
+	fmt.Printf("output := %v\n", output)
 }
