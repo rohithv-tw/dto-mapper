@@ -1,31 +1,23 @@
 package main
 
 import (
-	"context"
 	"dto-mapper/dto"
+	logUtil "dto-mapper/log"
 	"dto-mapper/mapper"
 	"fmt"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"os"
 	"time"
 )
 
 func init() {
-	zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	zerolog.TimeFieldFormat = time.RFC3339Nano
+
 }
 
 func main() {
-	logger := zerolog.New(os.Stdout)
-	ctx := logger.WithContext(context.Background())
-
-	logger = log.Ctx(ctx).With().Timestamp().
-		Fields(map[string]interface{}{
-			"Class":  "main",
-			"Method": "main",
-		}).
-		Logger()
+	ctx := logUtil.NewLoggerInContext()
+	logger := logUtil.GetLogger(ctx, map[string]interface{}{
+		"Class":  "main",
+		"Method": "main",
+	})
 
 	input := dto.SourceDto{
 		Name: dto.Name{
@@ -55,10 +47,10 @@ func main() {
 	output := dto.TargetDto{}
 
 	fmt.Printf("Input := %v\n", input)
-	log.Info().Msg("map from source to target")
+	logger.Info("map from source to target")
 	err := mapper.MapFrom(ctx, input, &output)
 	if err != nil {
-		log.Error().Msgf("Error while mapping.Error := %v", err)
+		logger.Errorf("Error while mapping.Error := %v", err)
 		return
 	}
 

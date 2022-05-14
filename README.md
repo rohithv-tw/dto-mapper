@@ -9,9 +9,8 @@ with tag value as gjson tag that can be used to parse from source struct.
 Example:
 
 Refer `dto/source_dto.go` and `dto/target_dto.go`
-Refer `main.go` for example.
+Refer `main.go` for sample implementation.
 
 Pending:
 
-Add logger wrapper to wrap zerolog logging.
 Add support for `time.Time` fields.
